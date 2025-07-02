@@ -1,10 +1,11 @@
-import { LatestInvoice } from "@/app/lib/definitions";
+import { fetchLatestInvoices } from "@/app/lib/data";
 import { lusitana } from "@/app/ui/fonts";
 import { ArrowPathIcon } from "@heroicons/react/24/outline";
 import clsx from "clsx";
 import Image from "next/image";
-export default async function LatestInvoices({
 
+export default async function LatestInvoices() {
+  // Remove props
   const latestInvoices = await fetchLatestInvoices();
 
   return (

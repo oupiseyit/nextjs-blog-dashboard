@@ -1,5 +1,5 @@
-"use client";
-
+import { fetchCardData } from "@/app/lib/data";
+import { AnimatedCard } from "@/app/ui/dashboard/animated-card";
 import { lusitana } from "@/app/ui/fonts";
 import {
   BanknotesIcon,
@@ -7,7 +7,6 @@ import {
   InboxIcon,
   UserGroupIcon,
 } from "@heroicons/react/24/outline";
-import { useEffect, useState } from "react";
 
 const iconMap = {
   collected: BanknotesIcon,
@@ -16,19 +15,37 @@ const iconMap = {
   invoices: InboxIcon,
 };
 
-export default function CardWrapper() {
+export default async function CardWrapper() {
+  const {
+    numberOfInvoices,
+    numberOfCustomers,
+    totalPaidInvoices,
+    totalPendingInvoices,
+  } = await fetchCardData();
   return (
     <>
       {/* NOTE: Uncomment this code in Chapter 9 */}
 
-      {/* <Card title="Collected" value={totalPaidInvoices} type="collected" />
-      <Card title="Pending" value={totalPendingInvoices} type="pending" />
-      <Card title="Total Invoices" value={numberOfInvoices} type="invoices" />
-      <Card
+      <AnimatedCard
+        title="Collected"
+        value={totalPaidInvoices}
+        type="collected"
+      />
+      <AnimatedCard
+        title="Pending"
+        value={totalPendingInvoices}
+        type="pending"
+      />
+      <AnimatedCard
+        title="Total Invoices"
+        value={numberOfInvoices}
+        type="invoices"
+      />
+      <AnimatedCard
         title="Total Customers"
         value={numberOfCustomers}
         type="customers"
-      /> */}
+      />
     </>
   );
 }
@@ -43,46 +60,6 @@ export function Card({
   type: "invoices" | "customers" | "pending" | "collected";
 }) {
   const Icon = iconMap[type];
-  const [animatedValue, setAnimatedValue] = useState(0);
-  const [isAnimating, setIsAnimating] = useState(false);
-
-  // Convert value to number for animation, handle string values
-  const numericValue =
-    typeof value === "string"
-      ? parseFloat(value.replace(/[^0-9.-]/g, "")) || 0
-      : value;
-  const isNumeric = !isNaN(numericValue) && isFinite(numericValue);
-
-  useEffect(() => {
-    if (!isNumeric) return;
-
-    setIsAnimating(true);
-    const duration = 1000; // 2 seconds
-    const steps = 60; // 60 fps
-    const increment = numericValue / steps;
-    let currentStep = 0;
-
-    const timer = setInterval(() => {
-      currentStep++;
-      const currentValue = Math.min(increment * currentStep, numericValue);
-      setAnimatedValue(currentValue);
-
-      if (currentStep >= steps) {
-        clearInterval(timer);
-        setAnimatedValue(numericValue);
-        setIsAnimating(false);
-      }
-    }, duration / steps);
-
-    return () => clearInterval(timer);
-  }, [numericValue, isNumeric]);
-
-  // Format the animated value
-  const displayValue = isNumeric
-    ? typeof value === "string" && value.includes("$")
-      ? `$${Math.round(animatedValue).toLocaleString()}`
-      : Math.round(animatedValue).toLocaleString()
-    : value;
 
   return (
     <div className="rounded-xl bg-gray-50 p-2 shadow-sm">
@@ -92,11 +69,9 @@ export function Card({
       </div>
       <p
         className={`${lusitana.className}
-          truncate rounded-xl bg-white px-4 py-8 text-center text-2xl transition-all duration-300 ${
-            isAnimating ? "scale-105" : "scale-100"
-          }`}
+          truncate rounded-xl bg-white px-4 py-8 text-center text-2xl`}
       >
-        {displayValue}
+        {value}
       </p>
     </div>
   );
